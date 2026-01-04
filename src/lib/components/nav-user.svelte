@@ -12,23 +12,34 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
     import { env } from "$env/dynamic/public";
-    import {userState} from "$lib/user-state.svelte";
+    import { userState } from "$lib/user-state.svelte";
 
     const sidebar = useSidebar();
 
     async function stayLoggedIn() {
         const access_token = localStorage.getItem("poi_access");
+        if (!access_token) return;
 
-        const response = await fetch(`${env.PUBLIC_API_URL}/auth/me`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${access_token}`,
-            },
-        });
+        try {
+            const response = await fetch(`${env.PUBLIC_API_URL}/auth/me`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${access_token}`,
+                },
+            });
 
-        const result = await response.json();
-        userState.me = result.data.user;
+            if (response.ok) {
+                const result = await response.json();
+                userState.me = result.data.user;
+            } else {
+                localStorage.removeItem("poi_access");
+                userState.me = null;
+                goto("/login");
+            }
+        } catch (error) {
+            console.error("Failed to fetch user session:", error);
+        }
     }
 
     async function logout() {
@@ -65,6 +76,7 @@
                     >
                         <Avatar.Root class="size-8 rounded-lg">
                             <Avatar.Fallback class="rounded-lg text-sm">
+                                A
                                 {userState.me?.profile.first_name[0]}
                                 {userState.me?.profile.last_name[0]}
                             </Avatar.Fallback>
@@ -76,7 +88,9 @@
                                 {userState.me?.profile.first_name}
                                 {userState.me?.profile.last_name}
                             </span>
-                            <span class="truncate text-xs">{userState.me?.email}</span>
+                            <span class="truncate text-xs"
+                                >{userState.me?.email}</span
+                            >
                         </div>
                         <ChevronsUpDownIcon class="ms-auto size-4" />
                     </Sidebar.MenuButton>
@@ -105,13 +119,15 @@
                                 {userState.me?.profile.first_name}
                                 {userState.me?.profile.last_name}
                             </span>
-                            <span class="truncate text-xs">{userState.me?.email}</span>
+                            <span class="truncate text-xs"
+                                >{userState.me?.email}</span
+                            >
                         </div>
                     </div>
                 </DropdownMenu.Label>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Group>
-                    <DropdownMenu.Item>
+                    <DropdownMenu.Item onclick={() => goto("/me")}>
                         <BadgeCheckIcon />
                         Account
                     </DropdownMenu.Item>
