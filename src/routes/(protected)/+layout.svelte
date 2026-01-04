@@ -5,9 +5,11 @@
 
     let { children } = $props();
 
-    onMount(() => {
-        const access_token = localStorage.getItem("poi_access");
-        if (!access_token) {
+    $effect(() => {
+        if (userState.restored && !userState.me) {
+            console.log(
+                "[Protected Guard] No authenticated user found, redirecting to /login",
+            );
             goto("/login");
         }
     });

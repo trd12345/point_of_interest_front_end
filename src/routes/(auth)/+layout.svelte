@@ -1,49 +1,38 @@
 <script lang="ts">
-    import {env} from "$env/dynamic/public";
-    import {userState} from "$lib/user-state.svelte";
-    import {goto} from "$app/navigation";
-    import {onMount} from "svelte";
+    import { env } from "$env/dynamic/public";
+    import { userState } from "$lib/user-state.svelte";
+    import { goto } from "$app/navigation";
+    import { onMount } from "svelte";
 
     let { children } = $props();
-    let checkingSession = $state(true);
 
-    async function stayLoggedIn() {
-        const access_token = localStorage.getItem("poi_access");
-
-        if (!access_token) {
-            checkingSession = false;
-            return;
+    $effect(() => {
+        // Redirection logic for authenticated users
+        if (userState.restored && userState.me) {
+            const target =
+                userState.me.role === "ADMIN" ? "/admin" : "/categories";
+            console.log(
+                `[Auth Guard] Authenticated as ${userState.me.role}, redirecting to ${target}`,
+            );
+            goto(target);
         }
-
-        const response = await fetch(`${env.PUBLIC_API_URL}/auth/me`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${access_token}`,
-            },
-        });
-
-        const res = await response.json();
-
-        if (response.ok) {
-            userState.me = res.data.user;
-            if (res.data.user.role === "ADMIN") {
-                goto("/placemarks");
-            } else {
-                goto("/categories");
-            }
-        } else {
-            checkingSession = false;
-        }
-    }
-
-    onMount(() => {
-        stayLoggedIn();
     });
 </script>
 
-<div class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-    <div class="flex w-full max-w-sm flex-col gap-6">
-        {@render children()}
+{#if userState.restored && !userState.me}
+    <div
+        class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10"
+    >
+        <div class="flex w-full max-w-sm flex-col gap-6">
+            {@render children()}
+        </div>
     </div>
-</div>
+{:else}
+    <!-- Loading state or transition to redirect -->
+    <div class="min-h-svh flex items-center justify-center">
+        <div class="animate-pulse flex flex-col items-center">
+            <div class="size-12 bg-zinc-200 rounded-full mb-4"></div>
+            <div class="h-4 w-24 bg-zinc-200 rounded"></div>
+        </div>
+    </div>
+{/if}

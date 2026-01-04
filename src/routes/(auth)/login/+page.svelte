@@ -37,9 +37,12 @@
             const res = await response.json();
 
             if (response.ok) {
+                console.log(
+                    "Login successful, updating user state and redirecting...",
+                );
                 localStorage.setItem("poi_access", res.data.access_token);
                 userState.me = res.data.user;
-                goto("/placemarks");
+                goto(res.data.user.role === "ADMIN" ? "/admin" : "/categories");
             } else {
                 errorMessage = res.errors || {
                     general: [res.message || "Login failed"],

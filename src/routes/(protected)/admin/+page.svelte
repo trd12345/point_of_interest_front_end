@@ -227,18 +227,13 @@
     }
 
     onMount(() => {
-        // Strict access control: redirect if not logged in or not an admin
-        if (!userState.me) {
-            goto("/login");
-            return;
+        if (userState.restored) {
+            if (userState.me?.role !== "ADMIN") {
+                goto("/");
+                return;
+            }
+            fetchData();
         }
-
-        if (userState.me.role !== "ADMIN") {
-            goto("/");
-            return;
-        }
-
-        fetchData();
     });
 </script>
 

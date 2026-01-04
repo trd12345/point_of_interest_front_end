@@ -7,32 +7,6 @@
     import { env } from "$env/dynamic/public";
     import { userState } from "$lib/user-state.svelte";
 
-    async function stayLoggedIn() {
-        const access_token = localStorage.getItem("poi_access");
-        if (!access_token) return;
-
-        try {
-            const response = await fetch(`${env.PUBLIC_API_URL}/auth/me`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${access_token}`,
-                },
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                userState.me = result.data.user;
-            } else {
-                localStorage.removeItem("poi_access");
-                userState.me = null;
-                goto("/login");
-            }
-        } catch (error) {
-            console.error("Failed to fetch user session:", error);
-        }
-    }
-
     async function logout() {
         const access_token = localStorage.getItem("poi_access");
 
@@ -48,10 +22,6 @@
         userState.me = null;
         goto("/login");
     }
-
-    onMount(() => {
-        stayLoggedIn();
-    });
 </script>
 
 <DropdownMenu.Root>
@@ -62,14 +32,14 @@
             <Avatar.Fallback
                 class="bg-primary/10 text-primary uppercase font-bold text-xs"
             >
-                {userState.me?.profile.first_name?.[0]}
-                {userState.me?.profile.last_name?.[0]}
+                {userState.me?.profile?.first_name?.[0] || "U"}
+                {userState.me?.profile?.last_name?.[0] || ""}
             </Avatar.Fallback>
         </Avatar.Root>
         <div class="hidden md:flex flex-col items-start gap-0.5">
             <span class="text-xs font-semibold leading-none">
-                {userState.me?.profile.first_name}
-                {userState.me?.profile.last_name}
+                {userState.me?.profile?.first_name}
+                {userState.me?.profile?.last_name}
             </span>
             <span class="text-[10px] text-muted-foreground leading-none">
                 {userState.me?.email}

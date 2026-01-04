@@ -65,18 +65,18 @@
             <h1
                 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 animate-fade-in"
             >
-                Discover the World's <br />
+                Safe Overnight Stays <br />
                 <span
                     class="text-transparent bg-clip-text bg-gradient-to-r from-primary-foreground to-blue-200"
-                    >Hidden Camping Gems</span
+                    >for Solo Campers</span
                 >
             </h1>
             <p
                 class="text-lg md:text-xl text-zinc-100 max-w-2xl mx-auto mb-10 animate-fade-in opacity-90"
             >
-                Join our community of outdoor enthusiasts. Share your favorite
-                spots, explore unique locations, and plan your perfect escape
-                into nature.
+                Connecting solo travelers with welcoming hosts. Discover private
+                homes and safe spaces to park, rest, and experience the
+                journey—one shared spot at a time.
             </p>
             <div
                 class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
@@ -277,10 +277,10 @@
                     >
                         <MapIcon class="size-8" />
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Curated Locations</h3>
+                    <h3 class="text-xl font-bold mb-3">Safe Hubs</h3>
                     <p class="text-muted-foreground">
-                        Find high-quality camping spots verified by our
-                        passionate community of travelers.
+                        Access a curated list of private host locations,
+                        verified for safety and solo-traveler suitability.
                     </p>
                 </div>
                 <div class="flex flex-col items-center text-center group">
@@ -301,10 +301,12 @@
                     >
                         <UsersIcon class="size-8" />
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Global Community</h3>
+                    <h3 class="text-xl font-bold mb-3">
+                        Solo-Focused Community
+                    </h3>
                     <p class="text-muted-foreground">
-                        Connect with like-minded explorers and share your unique
-                        discoveries with the world.
+                        Connect with welcoming hosts and fellow solo travelers
+                        who value safety, respect, and mutual support.
                     </p>
                 </div>
             </div>
