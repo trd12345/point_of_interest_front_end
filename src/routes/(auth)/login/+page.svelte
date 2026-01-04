@@ -37,24 +37,13 @@
             const res = await response.json();
 
             if (response.ok) {
-                if (res.data.user.email_verified_at === null) {
-                    errorMessage = {
-                        general: [
-                            "Unable to connect to the server. Please try again later.",
-                        ],
-                    };
-                    error = true;
-                }
-
                 localStorage.setItem("poi_access", res.data.access_token);
                 userState.me = res.data.user;
-                if (res.data.user.role === "ADMIN") {
-                    goto("/placemarks");
-                } else {
-                    goto("/categories");
-                }
+                goto("/placemarks");
             } else {
-                errorMessage = res.errors;
+                errorMessage = res.errors || {
+                    general: [res.message || "Login failed"],
+                };
                 error = true;
             }
         } catch (e) {
@@ -86,7 +75,7 @@
         >
         <p>
             <span class="font-medium me-1">Success!</span>
-            Registration was successful. You can now login.
+            Registration was successful. Please verify your email first.
         </p>
     </div>
 {/if}
