@@ -83,7 +83,6 @@
                 try {
                     return JSON.parse(text);
                 } catch (e) {
-                    console.error("Failed to parse JSON response:", text);
                     throw new Error(`Invalid JSON response from ${res.url}`);
                 }
             };
@@ -103,16 +102,13 @@
             if (catsRes.ok) {
                 categories = catsData.data.categories;
             } else {
-                console.error("Categories load failed", catsData);
             }
 
             if (spotsRes.ok) {
                 placemarks = spotsData.data.placemarks;
             } else {
-                console.error("Placemarks load failed", spotsData);
             }
         } catch (error: any) {
-            console.error("Failed to fetch admin data:", error);
             alert(`Error fetching admin data: ${error.message}`);
         } finally {
             loading = false;
@@ -141,7 +137,6 @@
             const errorData = await res
                 .json()
                 .catch(() => ({ message: "Unknown error" }));
-            console.error("Delete user failed:", errorData);
             alert(
                 `Failed to delete user: ${errorData.message || res.statusText}`,
             );
@@ -169,7 +164,6 @@
             const data = await res
                 .json()
                 .catch(() => ({ errors: ["Unknown error"] }));
-            console.error("Update role failed:", data);
             alert(data.errors?.[0] || data.message || "Failed to update role");
         }
     }
@@ -218,7 +212,6 @@
             const errorData = await res
                 .json()
                 .catch(() => ({ message: "Unknown error" }));
-            console.error("Delete category failed:", errorData);
             alert(
                 `Failed to delete category: ${errorData.message || "It might be in use."}`,
             );
@@ -240,7 +233,6 @@
             const errorData = await res
                 .json()
                 .catch(() => ({ message: "Unknown error" }));
-            console.error("Delete placemark failed:", errorData);
             alert(
                 `Failed to delete spot: ${errorData.message || res.statusText}`,
             );

@@ -10,11 +10,9 @@
     let { children } = $props();
 
     async function restoreSession() {
-        console.log("Restoring session...");
         const access_token = localStorage.getItem("poi_access");
 
         if (!access_token) {
-            console.log("No token found");
             userState.loading = false;
             userState.restored = true;
             return;
@@ -32,14 +30,11 @@
             if (response.ok) {
                 const result = await response.json();
                 userState.me = result.data.user;
-                console.log("Session restored for:", userState.me?.email);
             } else {
-                console.warn("Session token invalid");
                 localStorage.removeItem("poi_access");
                 userState.me = null;
             }
         } catch (error) {
-            console.error("Failed to restore session:", error);
         } finally {
             userState.loading = false;
             userState.restored = true;

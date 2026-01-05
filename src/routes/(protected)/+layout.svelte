@@ -7,9 +7,6 @@
 
     $effect(() => {
         if (userState.restored && !userState.me) {
-            console.log(
-                "[Protected Guard] No authenticated user found, redirecting to /login",
-            );
             goto("/login");
         }
     });

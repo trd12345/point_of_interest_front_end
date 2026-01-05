@@ -1,6 +1,12 @@
 <script lang="ts">
     import * as Card from "$lib/components/ui/card/index.js";
-    import { MapPinIcon, UserIcon, EyeIcon, TagIcon } from "@lucide/svelte";
+    import {
+        MapPinIcon,
+        UserIcon,
+        EyeIcon,
+        TagIcon,
+        StarIcon,
+    } from "@lucide/svelte";
 
     interface Placemark {
         id: string;
@@ -11,6 +17,8 @@
         country: string;
         image_url?: string;
         view_count: number;
+        average_rating?: number;
+        review_count?: number;
         category: {
             name: string;
         };
@@ -23,6 +31,17 @@
     }
 
     let { placemark }: { placemark: Placemark } = $props();
+
+    // Helper to render star rating
+    function renderStars(rating: number) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+        return { fullStars, hasHalfStar, emptyStars };
+    }
+
+    const stars = $derived(renderStars(placemark.average_rating || 0));
 </script>
 
 <a href="/placemarks/{placemark.id}" class="block group">
@@ -73,6 +92,57 @@
                 <MapPinIcon class="h-3 w-3 mr-1 text-primary/60" />
                 {placemark.city}, {placemark.country}
             </Card.Description>
+
+            <!-- Rating Stars -->
+            {#if (placemark.review_count || 0) > 0}
+                <div class="flex items-center gap-1 mt-2">
+                    <div class="flex items-center">
+                        {#each Array(stars.fullStars) as _}
+                            <StarIcon
+                                class="h-3.5 w-3.5 fill-yellow-400 text-yellow-400"
+                            />
+                        {/each}
+                        {#if stars.hasHalfStar}
+                            <div class="relative">
+                                <StarIcon class="h-3.5 w-3.5 text-yellow-400" />
+                                <div
+                                    class="absolute inset-0 overflow-hidden"
+                                    style="width: 50%"
+                                >
+                                    <StarIcon
+                                        class="h-3.5 w-3.5 fill-yellow-400 text-yellow-400"
+                                    />
+                                </div>
+                            </div>
+                        {/if}
+                        {#each Array(stars.emptyStars) as _}
+                            <StarIcon
+                                class="h-3.5 w-3.5 text-muted-foreground/30"
+                            />
+                        {/each}
+                    </div>
+                    <span class="text-xs font-semibold text-foreground/70 ml-1">
+                        {placemark.average_rating?.toFixed(1)}
+                    </span>
+                    <span class="text-xs text-muted-foreground">
+                        ({placemark.review_count}
+                        {placemark.review_count === 1 ? "review" : "reviews"})
+                    </span>
+                </div>
+            {:else}
+                <div class="flex items-center gap-1 mt-2">
+                    <div class="flex items-center">
+                        {#each Array(5) as _}
+                            <StarIcon
+                                class="h-3.5 w-3.5 text-muted-foreground/20"
+                            />
+                        {/each}
+                    </div>
+                    <span class="text-xs text-muted-foreground ml-1">
+                        No reviews yet
+                    </span>
+                </div>
+            {/if}
         </Card.Header>
 
         <Card.Content class="px-4 pb-4 pt-0">

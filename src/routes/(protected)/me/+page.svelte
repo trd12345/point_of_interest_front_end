@@ -69,7 +69,6 @@
                     profileError = [res.message || "Failed to update profile"];
                 }
             }
-            console.log(email_verified_at);
         } catch (error) {
             profileError = ["An unexpected error occurred."];
         } finally {
@@ -167,7 +166,6 @@
             contactEmail = userState.me.profile.contact_email || "";
             contactPhone = userState.me.profile.contact_phone || "";
             email_verified_at = userState.me.email_verified_at;
-            console.log(email_verified_at);
         }
     });
 </script>
@@ -293,85 +291,87 @@
         </Card.Root>
 
         <!-- Security Card -->
-        <Card.Root>
-            <Card.Header>
-                <Card.Title>Security</Card.Title>
-                <Card.Description
-                    >Change your password to keep your account secure.</Card.Description
-                >
-            </Card.Header>
-            <Card.Content>
-                <form onsubmit={handleChangePassword} class="space-y-4">
-                    {#if passwordSuccess}
-                        <div
-                            class="p-3 text-sm text-green-700 bg-green-100 rounded-md"
-                        >
-                            Password changed successfully!
-                        </div>
-                    {/if}
-                    {#if passwordError.length > 0}
-                        <div
-                            class="p-3 text-sm text-red-700 bg-red-100 rounded-md"
-                        >
-                            <ul class="list-disc list-inside">
-                                {#each passwordError as error}
-                                    <li>{error}</li>
-                                {/each}
-                            </ul>
-                        </div>
-                    {/if}
+        {#if userState.me?.oauth_provider !== "google"}
+            <Card.Root>
+                <Card.Header>
+                    <Card.Title>Security</Card.Title>
+                    <Card.Description
+                        >Change your password to keep your account secure.</Card.Description
+                    >
+                </Card.Header>
+                <Card.Content>
+                    <form onsubmit={handleChangePassword} class="space-y-4">
+                        {#if passwordSuccess}
+                            <div
+                                class="p-3 text-sm text-green-700 bg-green-100 rounded-md"
+                            >
+                                Password changed successfully!
+                            </div>
+                        {/if}
+                        {#if passwordError.length > 0}
+                            <div
+                                class="p-3 text-sm text-red-700 bg-red-100 rounded-md"
+                            >
+                                <ul class="list-disc list-inside">
+                                    {#each passwordError as error}
+                                        <li>{error}</li>
+                                    {/each}
+                                </ul>
+                            </div>
+                        {/if}
 
-                    <Field.Field>
-                        <Field.Label for="currentPassword"
-                            >Current Password</Field.Label
-                        >
-                        <Input
-                            id="currentPassword"
-                            type="password"
-                            bind:value={currentPassword}
-                            required
-                        />
-                    </Field.Field>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Field.Field>
-                            <Field.Label for="newPassword"
-                                >New Password</Field.Label
+                            <Field.Label for="currentPassword"
+                                >Current Password</Field.Label
                             >
                             <Input
-                                id="newPassword"
+                                id="currentPassword"
                                 type="password"
-                                bind:value={newPassword}
+                                bind:value={currentPassword}
                                 required
                             />
                         </Field.Field>
-                        <Field.Field>
-                            <Field.Label for="confirmPassword"
-                                >Confirm New Password</Field.Label
-                            >
-                            <Input
-                                id="confirmPassword"
-                                type="password"
-                                bind:value={confirmPassword}
-                                required
-                            />
-                        </Field.Field>
-                    </div>
 
-                    <Card.Footer class="px-0 pt-4">
-                        <Button
-                            type="submit"
-                            variant="secondary"
-                            disabled={passwordLoading}
-                        >
-                            {passwordLoading
-                                ? "Changing..."
-                                : "Change Password"}
-                        </Button>
-                    </Card.Footer>
-                </form>
-            </Card.Content>
-        </Card.Root>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Field.Field>
+                                <Field.Label for="newPassword"
+                                    >New Password</Field.Label
+                                >
+                                <Input
+                                    id="newPassword"
+                                    type="password"
+                                    bind:value={newPassword}
+                                    required
+                                />
+                            </Field.Field>
+                            <Field.Field>
+                                <Field.Label for="confirmPassword"
+                                    >Confirm New Password</Field.Label
+                                >
+                                <Input
+                                    id="confirmPassword"
+                                    type="password"
+                                    bind:value={confirmPassword}
+                                    required
+                                />
+                            </Field.Field>
+                        </div>
+
+                        <Card.Footer class="px-0 pt-4">
+                            <Button
+                                type="submit"
+                                variant="secondary"
+                                disabled={passwordLoading}
+                            >
+                                {passwordLoading
+                                    ? "Changing..."
+                                    : "Change Password"}
+                            </Button>
+                        </Card.Footer>
+                    </form>
+                </Card.Content>
+            </Card.Root>
+        {/if}
 
         <!-- Danger Zone Card -->
         <Card.Root class="border-destructive">

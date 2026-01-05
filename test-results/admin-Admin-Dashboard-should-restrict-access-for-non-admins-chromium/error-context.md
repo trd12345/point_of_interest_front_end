@@ -47,7 +47,7 @@
             - generic [ref=e44]: Email
             - textbox "Email" [ref=e45]:
               - /placeholder: m@example.com
-              - text: pamy@mailinator.com
+              - text: admin@demo.com
           - group [ref=e46]:
             - generic [ref=e47]:
               - generic [ref=e48]: Password

@@ -44,7 +44,6 @@
                     "Failed to verify email. The link may be invalid or expired.";
             }
         } catch (error) {
-            console.error(error);
             status = "error";
             message = "An unexpected error occurred. Please try again later.";
         }

@@ -9,6 +9,7 @@ export interface User {
         contact_email?: string | null;
         contact_phone?: string | null;
     };
+    oauth_provider: string | null;
 }
 
 class UserState {

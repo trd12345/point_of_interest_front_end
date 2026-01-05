@@ -4,16 +4,24 @@
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
 
+    import { page } from "$app/state";
+
     let { children } = $props();
 
     $effect(() => {
         // Redirection logic for authenticated users
         if (userState.restored && userState.me) {
-            const target =
+            let target =
                 userState.me.role === "ADMIN" ? "/admin" : "/categories";
-            console.log(
-                `[Auth Guard] Authenticated as ${userState.me.role}, redirecting to ${target}`,
-            );
+
+            // If coming from register page (e.g. Google Auth), go to profile/me
+            if (
+                page.url.pathname === "/register" &&
+                userState.me.role !== "ADMIN"
+            ) {
+                target = "/me";
+            }
+
             goto(target);
         }
     });

@@ -17,19 +17,34 @@
         initialData?: any;
     }>();
 
-    let name = $state(initialData.name || "");
-    let description = $state(initialData.description || "");
-    let categoryId = $state(initialData.categoryId || "");
-    let street = $state(initialData.street || "");
-    let houseNumber = $state(initialData.house_number || "");
-    let zip = $state(initialData.zip || "");
-    let city = $state(initialData.city || "");
-    let country = $state(initialData.country || "Germany"); // Default
-    let isPublic = $state(initialData.is_public ?? true);
+    let name = $state("");
+    let description = $state("");
+    let categoryId = $state("");
+    let street = $state("");
+    let houseNumber = $state("");
+    let zip = $state("");
+    let city = $state("");
+    let country = $state("Germany");
+    let isPublic = $state(true);
 
     let imageFile = $state<File | null>(null);
-    let imagePreview = $state<string | null>(initialData.image_url || null);
+    let imagePreview = $state<string | null>(null);
     let removeImage = $state(false);
+
+    $effect(() => {
+        if (initialData) {
+            name = initialData.name || "";
+            description = initialData.description || "";
+            categoryId = initialData.categoryId || "";
+            street = initialData.street || "";
+            houseNumber = initialData.house_number || "";
+            zip = initialData.zip || "";
+            city = initialData.city || "";
+            country = initialData.country || "Germany";
+            isPublic = initialData.is_public ?? true;
+            imagePreview = initialData.image_url || null;
+        }
+    });
     let fileInput: HTMLInputElement;
 
     function handleFileChange(e: Event) {

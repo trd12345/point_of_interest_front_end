@@ -37,7 +37,7 @@
         - img [ref=e31]
         - paragraph [ref=e33]:
           - generic [ref=e34]: Warning alert!
-          - generic [ref=e35]: Internal Server Error
+          - generic [ref=e35]: Invalid credentials
       - generic [ref=e36]:
         - generic [ref=e37]:
           - generic [ref=e38]: Login
@@ -56,11 +56,14 @@
             - textbox "Password" [ref=e50]: Password123!
           - group [ref=e51]:
             - button "Login" [active] [ref=e52]
-            - button "Login with Google" [ref=e53]:
-              - img
-              - text: Login with Google
-            - paragraph [ref=e54]:
+            - generic [ref=e57]: Or continue with
+            - iframe [ref=e60]:
+              - button "Über Google anmelden. (Wird in neuem Tab geöffnet)" [ref=f1e3] [cursor=pointer]:
+                - generic [ref=f1e5]:
+                  - img [ref=f1e7]
+                  - generic [ref=f1e14]: Über Google anmelden
+            - paragraph [ref=e61]:
               - text: Don't have an account?
-              - link "Register" [ref=e55] [cursor=pointer]:
+              - link "Register" [ref=e62] [cursor=pointer]:
                 - /url: /register
 ```

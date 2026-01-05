@@ -18,6 +18,7 @@
     let errorMessage = $state<Record<string, string[]>>({});
     let email = $state("");
     let password = $state("");
+    let googleLoading = $state(false);
 
     let registered = $derived(
         page.url.searchParams.get("registered") === "true",
@@ -37,9 +38,6 @@
             const res = await response.json();
 
             if (response.ok) {
-                console.log(
-                    "Login successful, updating user state and redirecting...",
-                );
                 localStorage.setItem("poi_access", res.data.access_token);
                 userState.me = res.data.user;
                 goto(res.data.user.role === "ADMIN" ? "/admin" : "/categories");
@@ -53,6 +51,172 @@
             error = true;
         }
     }
+
+    async function handleGoogleLogin() {
+        googleLoading = true;
+        error = false;
+
+        try {
+            const google = (window as any).google;
+            if (!google) {
+                throw new Error(
+                    "Google Identity Services not loaded. Please refresh the page.",
+                );
+            }
+
+            const clientId = env.PUBLIC_GOOGLE_CLIENT_ID?.replace(
+                /^"|"$/g,
+                "",
+            ).trim();
+
+            google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleGoogleCallback,
+                auto_select: false,
+                cancel_on_tap_outside: true,
+            });
+
+            google.accounts.id.prompt((notification: any) => {
+                if (notification.isNotDisplayed()) {
+                    // If One Tap is not displayed, we should probably tell the user or try another way
+                    errorMessage = {
+                        general: [
+                            "Google Sign-In prompt was blocked or not available. Please try again or check your browser settings.",
+                        ],
+                    };
+                    error = true;
+                    googleLoading = false;
+                } else if (notification.isSkippedMoment()) {
+                    googleLoading = false;
+                } else if (notification.isDismissedMoment()) {
+                    googleLoading = false;
+                }
+            });
+        } catch (e: any) {
+            errorMessage = { general: [e.message || "Google login failed"] };
+            error = true;
+            googleLoading = false;
+        }
+    }
+
+    async function handleGoogleCallback(response: any) {
+        googleLoading = true;
+        try {
+            const res = await fetch(`${env.PUBLIC_API_URL}/auth/google`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token: response.credential }),
+            });
+
+            if (res.ok) {
+                const responseBody = await res.json();
+                // The API returns { success: true, data: { access_token, user } }
+                const payload = responseBody.data;
+
+                if (payload && payload.access_token && payload.user) {
+                    localStorage.setItem("poi_access", payload.access_token);
+                    userState.me = payload.user;
+                    goto(
+                        payload.user.role === "ADMIN"
+                            ? "/admin"
+                            : "/categories",
+                    );
+                } else {
+                    throw new Error("Missing token or user data in response");
+                }
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                errorMessage = errorData.errors || {
+                    general: [
+                        errorData.message || "Google authentication failed",
+                    ],
+                };
+                error = true;
+            }
+        } catch (e: any) {
+            errorMessage = { general: [e.message || "Authentication failed"] };
+            error = true;
+        } finally {
+            googleLoading = false;
+        }
+    }
+
+    onMount(() => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onerror = () => {
+            errorMessage = {
+                general: [
+                    "Failed to load Google Sign-In. Check your internet connection or browser settings.",
+                ],
+            };
+            error = true;
+        };
+        script.onload = () => {
+            try {
+                const google = (window as any).google;
+
+                if (!env.PUBLIC_GOOGLE_CLIENT_ID) {
+                    errorMessage = {
+                        general: [
+                            "Frontend configuration error: Missing Google Client ID.",
+                        ],
+                    };
+                    error = true;
+                    return;
+                }
+
+                const clientId = env.PUBLIC_GOOGLE_CLIENT_ID?.replace(
+                    /^"|"$/g,
+                    "",
+                ).trim();
+                if (google) {
+                    google.accounts.id.initialize({
+                        client_id: clientId,
+                        callback: handleGoogleCallback,
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                    });
+
+                    // Render the official Google button
+                    const googleBtnElement =
+                        document.getElementById("googleBtn");
+                    if (googleBtnElement) {
+                        google.accounts.id.renderButton(googleBtnElement, {
+                            theme: "outline",
+                            size: "large",
+                            text: "signin_with",
+                            shape: "rectangular",
+                            width: 350,
+                        });
+                    }
+
+                    // Also try One Tap prompt
+                    google.accounts.id.prompt((notification: any) => {
+                        if (
+                            notification.isNotDisplayed() &&
+                            notification.getNotDisplayedReason() ===
+                                "opt_out_or_no_session"
+                        ) {
+                            // This is normal if user has opted out or isn't logged into Google
+                        }
+                    });
+                }
+            } catch (err: any) {
+                errorMessage = {
+                    general: [
+                        "Google Login initialization failed. Please check console for details.",
+                    ],
+                };
+                error = true;
+            }
+        };
+        document.head.appendChild(script);
+    });
 </script>
 
 {#if registered && !error}
@@ -151,18 +315,31 @@
                 </Field>
                 <Field>
                     <Button type="submit" class="w-full">Login</Button>
-                    <Button variant="outline" class="w-full">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
+
+                    <div class="relative my-4">
+                        <div class="absolute inset-0 flex items-center">
+                            <span class="w-full border-t"></span>
+                        </div>
+                        <div
+                            class="relative flex justify-center text-xs uppercase"
                         >
-                            <path
-                                d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                                fill="currentColor"
-                            />
-                        </svg>
-                        Login with Google
-                    </Button>
+                            <span
+                                class="bg-background px-2 text-muted-foreground"
+                                >Or continue with</span
+                            >
+                        </div>
+                    </div>
+
+                    <div
+                        id="googleBtn"
+                        class="w-full flex justify-center min-h-[40px]"
+                    >
+                        {#if googleLoading}
+                            <Button variant="outline" class="w-full" disabled>
+                                Loading Google Auth...
+                            </Button>
+                        {/if}
+                    </div>
                     <FieldDescription class="text-center">
                         Don't have an account? <a href="/register">Register</a>
                     </FieldDescription>

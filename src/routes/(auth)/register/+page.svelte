@@ -5,7 +5,9 @@
     import { Input } from "$lib/components/ui/input/index.js";
     import { env } from "$env/dynamic/public";
     import { goto } from "$app/navigation";
-    import type { ComponentProps } from "svelte";
+    import { onMount, type ComponentProps } from "svelte";
+    import { deserialize } from "$app/forms";
+    import { userState } from "$lib/user-state.svelte";
 
     let { ...restProps }: ComponentProps<typeof Card.Root> = $props();
 
@@ -18,6 +20,7 @@
     let error = $state(false);
     let errorMessage = $state<Record<string, string[]>>({});
     let loading = $state(false);
+    let googleLoading = $state(false);
 
     async function handleRegister(e: Event) {
         e.preventDefault();
@@ -50,7 +53,6 @@
             );
 
             const res = await response.json();
-            console.log(res);
             if (response.ok) {
                 goto("/login?registered=true");
             } else {
@@ -60,7 +62,6 @@
                 };
             }
         } catch (err) {
-            console.error(err);
             error = true;
             errorMessage = {
                 general: [
@@ -71,6 +72,88 @@
             loading = false;
         }
     }
+
+    async function handleGoogleCallback(response: any) {
+        googleLoading = true;
+
+        try {
+            const res = await fetch(`${env.PUBLIC_API_URL}/auth/google`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ token: response.credential }),
+            });
+
+            if (res.ok) {
+                const responseBody = await res.json(); // Renamed for clarity
+
+                // FIX: Access the nested 'data' object
+                const payload = responseBody.data;
+
+                // Check if payload exists before checking its properties
+                if (payload && payload.access_token && payload.user) {
+                    localStorage.setItem("poi_access", payload.access_token);
+                    userState.me = payload.user;
+                    goto("/me");
+                } else {
+                    throw new Error("Missing token or user data in response");
+                }
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                errorMessage = errorData.errors || {
+                    general: [
+                        errorData.message || "Google registration failed",
+                    ],
+                };
+                error = true;
+            }
+        } catch (e: any) {
+            errorMessage = { general: [e.message || "Authentication failed"] };
+            error = true;
+        } finally {
+            googleLoading = false;
+        }
+    }
+
+    onMount(() => {
+        const script = document.createElement("script");
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onerror = () => {};
+        script.onload = () => {
+            try {
+                const google = (window as any).google;
+                const clientId = env.PUBLIC_GOOGLE_CLIENT_ID?.replace(
+                    /^"|"$/g,
+                    "",
+                ).trim();
+
+                if (google && clientId) {
+                    google.accounts.id.initialize({
+                        client_id: clientId,
+                        callback: handleGoogleCallback,
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                    });
+
+                    const googleBtnElement =
+                        document.getElementById("googleBtn");
+                    if (googleBtnElement) {
+                        google.accounts.id.renderButton(googleBtnElement, {
+                            theme: "outline",
+                            size: "large",
+                            text: "signup_with",
+                            shape: "rectangular",
+                            width: 350,
+                        });
+                    }
+                }
+            } catch (err: any) {}
+        };
+        document.head.appendChild(script);
+    });
 </script>
 
 <Card.Root {...restProps}>
@@ -207,24 +290,35 @@
                         <Button type="submit" class="w-full" disabled={loading}>
                             {loading ? "Creating account..." : "Create Account"}
                         </Button>
-                        <Button variant="outline" type="button" class="w-full">
-                            <svg
-                                class="mr-2 h-4 w-4"
-                                aria-hidden="true"
-                                focusable="false"
-                                data-prefix="fab"
-                                data-icon="google"
-                                role="img"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 488 512"
+
+                        <div class="relative my-4">
+                            <div class="absolute inset-0 flex items-center">
+                                <span class="w-full border-t"></span>
+                            </div>
+                            <div
+                                class="relative flex justify-center text-xs uppercase"
                             >
-                                <path
-                                    fill="currentColor"
-                                    d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"
-                                ></path>
-                            </svg>
-                            Sign up with Google
-                        </Button>
+                                <span
+                                    class="bg-background px-2 text-muted-foreground"
+                                    >Or continue with</span
+                                >
+                            </div>
+                        </div>
+
+                        <div
+                            id="googleBtn"
+                            class="w-full flex justify-center min-h-[40px]"
+                        >
+                            {#if googleLoading}
+                                <Button
+                                    variant="outline"
+                                    class="w-full"
+                                    disabled
+                                >
+                                    Loading Google Auth...
+                                </Button>
+                            {/if}
+                        </div>
                         <Field.Description class="px-6 text-center">
                             Already have an account? <a
                                 href="/login"

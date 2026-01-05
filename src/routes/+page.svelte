@@ -26,7 +26,6 @@
                 publicSpots = result.data.placemarks?.slice(0, 4) || [];
             }
         } catch (error) {
-            console.error("Failed to fetch public spots:", error);
         } finally {
             loading = false;
         }

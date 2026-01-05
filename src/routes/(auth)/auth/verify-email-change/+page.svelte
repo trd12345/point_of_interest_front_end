@@ -33,8 +33,6 @@
 
             const res = await response.json();
 
-            console.log(res);
-
             if (response.ok) {
                 status = "success";
                 message = "Your email has been successfully verified!";

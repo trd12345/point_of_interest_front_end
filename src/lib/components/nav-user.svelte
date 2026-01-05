@@ -37,9 +37,7 @@
                 userState.me = null;
                 goto("/login");
             }
-        } catch (error) {
-            console.error("Failed to fetch user session:", error);
-        }
+        } catch (error) {}
     }
 
     async function logout() {
