@@ -138,7 +138,13 @@
             // Refresh spots and cats as they might be gone too
             fetchData();
         } else {
-            alert("Failed to delete user");
+            const errorData = await res
+                .json()
+                .catch(() => ({ message: "Unknown error" }));
+            console.error("Delete user failed:", errorData);
+            alert(
+                `Failed to delete user: ${errorData.message || res.statusText}`,
+            );
         }
     }
 
@@ -160,8 +166,11 @@
             const data = await res.json();
             users = users.map((u) => (u.id === id ? data.data.user : u));
         } else {
-            const data = await res.json();
-            alert(data.errors?.[0] || "Failed to update role");
+            const data = await res
+                .json()
+                .catch(() => ({ errors: ["Unknown error"] }));
+            console.error("Update role failed:", data);
+            alert(data.errors?.[0] || data.message || "Failed to update role");
         }
     }
 
@@ -206,7 +215,13 @@
         if (res.ok) {
             categories = categories.filter((c) => c.id !== id);
         } else {
-            alert("Failed to delete category. It might be in use.");
+            const errorData = await res
+                .json()
+                .catch(() => ({ message: "Unknown error" }));
+            console.error("Delete category failed:", errorData);
+            alert(
+                `Failed to delete category: ${errorData.message || "It might be in use."}`,
+            );
         }
     }
 
@@ -222,17 +237,24 @@
         if (res.ok) {
             placemarks = placemarks.filter((p) => p.id !== id);
         } else {
-            alert("Failed to delete spot");
+            const errorData = await res
+                .json()
+                .catch(() => ({ message: "Unknown error" }));
+            console.error("Delete placemark failed:", errorData);
+            alert(
+                `Failed to delete spot: ${errorData.message || res.statusText}`,
+            );
         }
     }
 
-    onMount(() => {
+    $effect(() => {
         if (userState.restored) {
             if (userState.me?.role !== "ADMIN") {
                 goto("/");
-                return;
+            } else if (users.length === 0) {
+                // Fetch data when we're admin and haven't loaded yet
+                fetchData();
             }
-            fetchData();
         }
     });
 </script>

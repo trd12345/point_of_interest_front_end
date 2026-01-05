@@ -1,0 +1,66 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - link "CampingPOI Logo CampingPOI" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - img "CampingPOI Logo" [ref=e9]
+      - generic [ref=e10]: CampingPOI
+    - navigation "main" [ref=e11]:
+      - list [ref=e13]:
+        - listitem [ref=e14]:
+          - link "Placemarks" [ref=e15] [cursor=pointer]:
+            - /url: /placemarks
+            - generic [ref=e16]:
+              - img
+              - text: Placemarks
+        - listitem [ref=e17]:
+          - link "Categories" [ref=e18] [cursor=pointer]:
+            - /url: /categories
+            - generic [ref=e19]:
+              - img
+              - text: Categories
+        - listitem [ref=e20]:
+          - button "More" [ref=e21]:
+            - text: More
+            - img
+    - navigation [ref=e23]:
+      - generic [ref=e24]:
+        - link "Log in" [ref=e25] [cursor=pointer]:
+          - /url: /login
+        - link "Sign up" [ref=e26] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e27]:
+    - generic [ref=e29]:
+      - alert [ref=e30]:
+        - img [ref=e31]
+        - paragraph [ref=e33]:
+          - generic [ref=e34]: Warning alert!
+          - generic [ref=e35]: Internal Server Error
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]: Login
+          - paragraph [ref=e39]: Enter your email below to login to your account
+        - generic [ref=e42]:
+          - group [ref=e43]:
+            - generic [ref=e44]: Email
+            - textbox "Email" [ref=e45]:
+              - /placeholder: m@example.com
+              - text: pamy@mailinator.com
+          - group [ref=e46]:
+            - generic [ref=e47]:
+              - generic [ref=e48]: Password
+              - link "Forgot your password?" [ref=e49] [cursor=pointer]:
+                - /url: /forgot-password
+            - textbox "Password" [ref=e50]: Password123!
+          - group [ref=e51]:
+            - button "Login" [active] [ref=e52]
+            - button "Login with Google" [ref=e53]:
+              - img
+              - text: Login with Google
+            - paragraph [ref=e54]:
+              - text: Don't have an account?
+              - link "Register" [ref=e55] [cursor=pointer]:
+                - /url: /register
+```

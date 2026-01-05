@@ -4,6 +4,8 @@
     import { env } from "$env/dynamic/public";
     import { userState } from "$lib/user-state.svelte";
     import SiteNavigation from "$lib/components/site-navigation.svelte";
+    import { cn } from "$lib/utils.js";
+    import { page } from "$app/state";
 
     let { children } = $props();
 
@@ -55,7 +57,7 @@
 
 <div class="min-h-screen bg-background flex flex-col">
     <SiteNavigation />
-    <main class="flex-1 mt-16 p-4">
+    <main class={cn("flex-1 mt-16", page.url.pathname !== "/" && "p-4")}>
         {@render children()}
     </main>
 </div>

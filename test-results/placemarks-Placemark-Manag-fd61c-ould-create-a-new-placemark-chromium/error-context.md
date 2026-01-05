@@ -1,0 +1,111 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - link "CampingPOI Logo CampingPOI" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - img "CampingPOI Logo" [ref=e9]
+      - generic [ref=e10]: CampingPOI
+    - navigation "main" [ref=e11]:
+      - list [ref=e13]:
+        - listitem [ref=e14]:
+          - link "Placemarks" [ref=e15] [cursor=pointer]:
+            - /url: /placemarks
+            - generic [ref=e16]:
+              - img
+              - text: Placemarks
+        - listitem [ref=e17]:
+          - link "Categories" [ref=e18] [cursor=pointer]:
+            - /url: /categories
+            - generic [ref=e19]:
+              - img
+              - text: Categories
+        - listitem [ref=e20]:
+          - button "More" [ref=e21]:
+            - text: More
+            - img
+    - navigation [ref=e23]:
+      - link "New Spot" [ref=e24] [cursor=pointer]:
+        - /url: /placemarks/new
+        - img
+        - text: New Spot
+      - button "U M U. Morton pamy@mailinator.com" [ref=e25]:
+        - generic [ref=e27]: U M
+        - generic [ref=e28]:
+          - generic [ref=e29]: U. Morton
+          - generic [ref=e30]: pamy@mailinator.com
+  - main [ref=e31]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - link [ref=e36] [cursor=pointer]:
+          - /url: /placemarks
+          - img
+        - generic [ref=e37]:
+          - heading "Add New Spot" [level=1] [ref=e38]
+          - paragraph [ref=e39]: Share a new camping location with the world.
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]: Spot Details
+          - paragraph [ref=e43]: Fill in the details about the camping location.
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - heading "Basic Details" [level=3] [ref=e48]
+              - group [ref=e49]:
+                - generic [ref=e50]: Spot Name
+                - textbox "Spot Name" [ref=e51]:
+                  - /placeholder: e.g. Dreamy Garden
+                  - text: Dreamy Garden
+              - group [ref=e52]:
+                - generic [ref=e53]: Category
+                - combobox "Category" [ref=e54]:
+                  - option "Select a category" [disabled]
+                  - option "Apartment" [selected]
+                  - option "Garden"
+                  - option "House"
+                  - option "Cabin"
+                  - option "Hut"
+                  - option "Studio"
+                  - option "Houseboat"
+                  - option "Private room"
+                  - option "Shared room"
+              - group [ref=e55]:
+                - generic [ref=e56]: Description
+                - textbox "Description" [ref=e57]:
+                  - /placeholder: Tell us about this spot...
+                  - text: test
+            - generic [ref=e58]:
+              - heading "Location" [level=3] [ref=e59]
+              - generic [ref=e60]:
+                - group [ref=e62]:
+                  - generic [ref=e63]: Street
+                  - textbox "Street" [active] [ref=e64]: Furtmayrstraße
+                - group [ref=e66]:
+                  - generic [ref=e67]: No.
+                  - textbox "No." [ref=e68]
+              - generic [ref=e69]:
+                - group [ref=e71]:
+                  - generic [ref=e72]: Zip Code
+                  - spinbutton "Zip Code" [ref=e73]
+                - group [ref=e75]:
+                  - generic [ref=e76]: City
+                  - textbox "City" [ref=e77]
+              - group [ref=e78]:
+                - generic [ref=e79]: Country
+                - textbox "Country" [ref=e80]: Germany
+              - generic [ref=e81]:
+                - img [ref=e82]
+                - generic [ref=e83]: Geographical coordinates will be automatically calculated based on the address.
+          - generic [ref=e84]:
+            - heading "Media" [level=3] [ref=e85]
+            - generic [ref=e87] [cursor=pointer]:
+              - img [ref=e88]
+              - paragraph [ref=e89]: Click to upload image
+              - paragraph [ref=e90]: PNG, JPG, WEBP up to 5MB
+          - generic [ref=e91]:
+            - generic [ref=e92] [cursor=pointer]:
+              - checkbox "List this spot publicly" [checked] [ref=e93]
+              - generic [ref=e94]: List this spot publicly
+            - button "Save Camping Spot" [ref=e95]
+```

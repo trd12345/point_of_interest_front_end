@@ -20,7 +20,7 @@
 
         localStorage.removeItem("poi_access");
         userState.me = null;
-        goto("/login");
+        goto("/");
     }
 </script>
 

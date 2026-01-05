@@ -96,6 +96,13 @@
                     View Spot →
                 </div>
             </div>
+            <div class="mt-4 pt-4 border-t border-border/50 text-center">
+                <span
+                    class="text-xs font-semibold text-primary hover:underline group-hover:text-primary/80 transition-colors"
+                >
+                    View Details
+                </span>
+            </div>
         </Card.Content>
     </Card.Root>
 </a>

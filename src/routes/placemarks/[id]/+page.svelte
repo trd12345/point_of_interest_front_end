@@ -17,6 +17,9 @@
         EditIcon,
         GlobeIcon,
         LockIcon,
+        StarIcon,
+        MessageSquareIcon,
+        SendIcon,
     } from "@lucide/svelte";
     import Map from "$lib/components/placemarks/Map.svelte";
 
@@ -24,6 +27,15 @@
     let loading = $state(true);
     let error = $state<string | null>(null);
     let deleting = $state(false);
+
+    // Review State
+    let newComment = $state("");
+    let newRating = $state(0);
+    let submittingReview = $state(false);
+    let hoveredRating = $state(0);
+    let replyingTo = $state<string | null>(null);
+    let replyComment = $state("");
+    let submittingReply = $state(false);
 
     async function fetchPlacemark() {
         loading = true;
@@ -41,7 +53,9 @@
             const res = await response.json();
 
             if (response.ok) {
-                placemark = res.data.placemark;
+                // Ensure a fresh reference to trigger Svelte 5 reactivity if needed,
+                // though $state handles mutations, reassignment is safer for deep structures in some contexts.
+                placemark = { ...res.data.placemark };
             } else {
                 error = res.message || "Spot not found";
             }
@@ -49,6 +63,99 @@
             error = "Connection error";
         } finally {
             loading = false;
+        }
+    }
+
+    async function submitReview() {
+        if (newRating === 0) return alert("Please select a rating");
+        if (!newComment.trim()) return alert("Please enter a comment");
+
+        submittingReview = true;
+        try {
+            const token = localStorage.getItem("poi_access");
+            const response = await fetch(`${env.PUBLIC_API_URL}/reviews`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    placemarkId: placemark.id,
+                    rating: newRating,
+                    comment: newComment,
+                }),
+            });
+
+            if (response.ok) {
+                newComment = "";
+                newRating = 0;
+                await fetchPlacemark(); // Refresh data
+            } else {
+                const res = await response.json();
+                alert(res.errors?.[0] || "Failed to submit review");
+            }
+        } catch (err) {
+            alert("Connection error");
+        } finally {
+            submittingReview = false;
+        }
+    }
+
+    async function submitReply(parentId: string) {
+        if (!replyComment.trim()) return;
+
+        submittingReply = true;
+        try {
+            const token = localStorage.getItem("poi_access");
+            const response = await fetch(`${env.PUBLIC_API_URL}/reviews`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    placemarkId: placemark.id,
+                    comment: replyComment,
+                    parentId,
+                }),
+            });
+
+            if (response.ok) {
+                replyComment = "";
+                replyingTo = null;
+                await fetchPlacemark();
+            } else {
+                alert("Failed to post reply");
+            }
+        } catch (err) {
+            alert("Connection error");
+        } finally {
+            submittingReply = false;
+        }
+    }
+
+    async function deleteReview(reviewId: string) {
+        if (!confirm("Are you sure you want to delete this comment?")) return;
+
+        try {
+            const token = localStorage.getItem("poi_access");
+            const response = await fetch(
+                `${env.PUBLIC_API_URL}/reviews/${reviewId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+
+            if (response.ok) {
+                await fetchPlacemark();
+            } else {
+                alert("Failed to delete review");
+            }
+        } catch (err) {
+            alert("Connection error");
         }
     }
 
@@ -92,6 +199,21 @@
     const isOwner = $derived(
         placemark?.userId === userState.me?.id ||
             userState.me?.role === "ADMIN",
+    );
+
+    const avgRating = $derived(
+        placemark?.reviews?.length
+            ? (
+                  placemark.reviews
+                      .filter((r: any) => r.rating)
+                      .reduce((acc: number, r: any) => acc + r.rating, 0) /
+                  placemark.reviews.filter((r: any) => r.rating).length
+              ).toFixed(1)
+            : "0.0",
+    );
+
+    const totalReviews = $derived(
+        placemark?.reviews ? placemark.reviews.length : 0,
     );
 </script>
 
@@ -274,6 +396,296 @@
                                         > to enable interactive maps.
                                     </p>
                                 </div>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+
+                <!-- Reviews & Ratings Section -->
+                <div class="pt-12 border-t space-y-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold">
+                                Reviews & Ratings
+                            </h3>
+                            <div class="flex items-center mt-1 space-x-2">
+                                <div class="flex items-center text-amber-500">
+                                    <StarIcon class="size-4 fill-current" />
+                                    <span class="ml-1 font-bold text-lg"
+                                        >{avgRating}</span
+                                    >
+                                </div>
+                                <span class="text-muted-foreground text-sm"
+                                    >• {totalReviews} reviews</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Form -->
+                    {#if userState.me && !isOwner}
+                        <Card.Root class="bg-primary/5 border-primary/10">
+                            <Card.Content class="p-6 space-y-4">
+                                <h4 class="font-bold">Leave a Review</h4>
+                                <div class="flex items-center space-x-1">
+                                    {#each Array(5) as _, i}
+                                        <button
+                                            type="button"
+                                            class="p-1 focus:outline-none transition-transform active:scale-90"
+                                            onmouseenter={() =>
+                                                (hoveredRating = i + 1)}
+                                            onmouseleave={() =>
+                                                (hoveredRating = 0)}
+                                            onclick={() => (newRating = i + 1)}
+                                        >
+                                            <StarIcon
+                                                class="size-8 {i <
+                                                (hoveredRating || newRating)
+                                                    ? 'text-amber-500 fill-current'
+                                                    : 'text-muted-foreground/30'}"
+                                            />
+                                        </button>
+                                    {/each}
+                                </div>
+                                <div class="relative">
+                                    <textarea
+                                        bind:value={newComment}
+                                        placeholder="Share your experience here..."
+                                        class="w-full bg-background border rounded-xl p-4 min-h-[120px] focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none shadow-sm"
+                                    ></textarea>
+                                    <div class="mt-4 flex justify-end">
+                                        <Button
+                                            onclick={submitReview}
+                                            disabled={submittingReview}
+                                        >
+                                            {#if submittingReview}
+                                                <Loader2Icon
+                                                    class="mr-2 h-4 w-4 animate-spin"
+                                                />
+                                            {/if}
+                                            Submit Review
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card.Content>
+                        </Card.Root>
+                    {:else if !userState.me}
+                        <div
+                            class="p-6 bg-muted rounded-2xl border border-dashed text-center"
+                        >
+                            <p class="text-sm text-muted-foreground">
+                                Please <a
+                                    href="/login"
+                                    class="text-primary font-bold hover:underline"
+                                    >login</a
+                                > to leave a review.
+                            </p>
+                        </div>
+                    {:else if isOwner}
+                        <div
+                            class="p-6 bg-primary/5 rounded-2xl border border-dashed text-center"
+                        >
+                            <p class="text-sm text-muted-foreground">
+                                You are the host of this spot. You can reply to
+                                guest reviews below.
+                            </p>
+                        </div>
+                    {/if}
+
+                    <!-- Review List -->
+                    <div class="space-y-6">
+                        {#if placemark.reviews?.length === 0}
+                            <div
+                                class="py-12 text-center text-muted-foreground"
+                            >
+                                <MessageSquareIcon
+                                    class="size-12 mx-auto opacity-10 mb-4"
+                                />
+                                <p>No reviews yet. Be the first to rate!</p>
+                            </div>
+                        {:else}
+                            <div class="space-y-8">
+                                {#each placemark.reviews as review}
+                                    <div class="space-y-4">
+                                        <div class="flex justify-between">
+                                            <div
+                                                class="flex items-center space-x-3"
+                                            >
+                                                <div
+                                                    class="size-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground"
+                                                >
+                                                    {review.user.profile
+                                                        .first_name[0]}
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        class="font-bold text-sm"
+                                                    >
+                                                        {review.user.profile
+                                                            .first_name}
+                                                        {review.user.profile
+                                                            .last_name}
+                                                    </p>
+                                                    <p
+                                                        class="text-[10px] text-muted-foreground"
+                                                    >
+                                                        {new Date(
+                                                            review.created_at,
+                                                        ).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="flex items-center space-x-1 text-amber-500"
+                                            >
+                                                {#each Array(5) as _, i}
+                                                    <StarIcon
+                                                        class="size-3 {i <
+                                                        review.rating
+                                                            ? 'fill-current'
+                                                            : 'text-muted-foreground/20'}"
+                                                    />
+                                                {/each}
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="bg-muted/30 p-4 rounded-2xl border border-border/50 relative group"
+                                        >
+                                            <p class="text-sm leading-relaxed">
+                                                {review.comment}
+                                            </p>
+
+                                            <div
+                                                class="mt-4 flex items-center space-x-3 transition-opacity"
+                                            >
+                                                {#if isOwner && !review.replies?.length}
+                                                    <button
+                                                        class="text-[10px] font-bold uppercase tracking-tight text-primary hover:underline flex items-center"
+                                                        onclick={() =>
+                                                            (replyingTo =
+                                                                review.id)}
+                                                    >
+                                                        <MessageSquareIcon
+                                                            class="size-3 mr-1"
+                                                        /> Reply
+                                                    </button>
+                                                {/if}
+                                                {#if userState.me?.id === review.userId || userState.me?.role === "ADMIN"}
+                                                    <button
+                                                        class="text-[10px] font-bold uppercase tracking-tight text-destructive hover:underline flex items-center"
+                                                        onclick={() =>
+                                                            deleteReview(
+                                                                review.id,
+                                                            )}
+                                                    >
+                                                        <Trash2Icon
+                                                            class="size-3 mr-1"
+                                                        /> Delete
+                                                    </button>
+                                                {/if}
+                                            </div>
+                                        </div>
+
+                                        <!-- Host Replies -->
+                                        {#if review.replies?.length}
+                                            <div
+                                                class="ml-10 space-y-4 border-l-2 border-primary/10 pl-6"
+                                            >
+                                                {#each review.replies as reply}
+                                                    <div class="space-y-2">
+                                                        <div
+                                                            class="flex items-center space-x-2"
+                                                        >
+                                                            <div
+                                                                class="size-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary"
+                                                            >
+                                                                H
+                                                            </div>
+                                                            <p
+                                                                class="text-xs font-bold"
+                                                            >
+                                                                Host Reply
+                                                            </p>
+                                                            <p
+                                                                class="text-[9px] text-muted-foreground"
+                                                            >
+                                                                {new Date(
+                                                                    reply.created_at,
+                                                                ).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                        <div
+                                                            class="bg-primary/5 p-3 rounded-xl border border-primary/10 relative group"
+                                                        >
+                                                            <p
+                                                                class="text-xs leading-relaxed"
+                                                            >
+                                                                {reply.comment}
+                                                            </p>
+                                                            {#if isOwner || userState.me?.role === "ADMIN"}
+                                                                <button
+                                                                    class="mt-2 text-[9px] font-bold uppercase tracking-tight text-destructive hover:underline flex items-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    onclick={() =>
+                                                                        deleteReview(
+                                                                            reply.id,
+                                                                        )}
+                                                                >
+                                                                    <Trash2Icon
+                                                                        class="size-2.5 mr-1"
+                                                                    /> Delete
+                                                                </button>
+                                                            {/if}
+                                                        </div>
+                                                    </div>
+                                                {/each}
+                                            </div>
+                                        {/if}
+
+                                        <!-- Reply Form -->
+                                        {#if replyingTo === review.id}
+                                            <div class="ml-10 pt-2">
+                                                <div class="relative">
+                                                    <textarea
+                                                        bind:value={
+                                                            replyComment
+                                                        }
+                                                        placeholder="Write your response as host..."
+                                                        class="w-full bg-background border rounded-lg p-3 text-xs focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all resize-none shadow-sm"
+                                                    ></textarea>
+                                                    <div
+                                                        class="mt-2 flex justify-end space-x-2"
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            class="text-xs"
+                                                            onclick={() =>
+                                                                (replyingTo =
+                                                                    null)}
+                                                            >Cancel</Button
+                                                        >
+                                                        <Button
+                                                            size="sm"
+                                                            class="text-xs"
+                                                            onclick={() =>
+                                                                submitReply(
+                                                                    review.id,
+                                                                )}
+                                                            disabled={submittingReply}
+                                                        >
+                                                            {#if submittingReply}
+                                                                <Loader2Icon
+                                                                    class="size-3 mr-2 animate-spin"
+                                                                />
+                                                            {/if}
+                                                            Post Reply
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                {/each}
                             </div>
                         {/if}
                     </div>
