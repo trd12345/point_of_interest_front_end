@@ -343,8 +343,8 @@
                                             class="hover:bg-muted/30 transition-colors"
                                         >
                                             <td class="px-6 py-4 font-medium">
-                                                {user.profile?.first_name}
-                                                {user.profile?.last_name}
+                                                {user.profile?.first_name?.[0]}. {user
+                                                    .profile?.last_name}
                                             </td>
                                             <td class="px-6 py-4"
                                                 >{user.email}</td
@@ -590,8 +590,8 @@
                                                     <span
                                                         class="font-medium text-xs whitespace-nowrap"
                                                         >{p.user?.profile
-                                                            ?.first_name}
-                                                        {p.user?.profile
+                                                            ?.first_name?.[0]}. {p
+                                                            .user?.profile
                                                             ?.last_name}</span
                                                     >
                                                     <span

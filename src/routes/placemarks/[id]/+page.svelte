@@ -201,45 +201,29 @@
                     </p>
                 </div>
 
-                <div
-                    class="pt-8 border-t grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
-                    <div class="p-4 rounded-xl bg-muted/50 flex items-start">
-                        <MapPinIcon class="h-5 w-5 text-primary mr-3 mt-1" />
+                <div class="pt-8 border-t">
+                    <div
+                        class="p-6 rounded-2xl bg-muted/50 flex items-start shadow-sm border border-border/50"
+                    >
+                        <MapPinIcon class="h-6 w-6 text-primary mr-4 mt-1" />
                         <div>
                             <h4
                                 class="font-bold text-sm uppercase text-muted-foreground tracking-tight"
                             >
-                                Location
+                                General Location
                             </h4>
-                            <p class="mt-1 font-medium text-sm sm:text-base">
-                                {placemark.street}
-                                {placemark.house_number || ""}
-                            </p>
                             <p
-                                class="text-muted-foreground text-sm sm:text-base"
+                                class="text-muted-foreground text-lg mt-1 font-medium"
                             >
                                 {placemark.zip}
                                 {placemark.city}, {placemark.country}
                             </p>
-                        </div>
-                    </div>
-                    <div class="p-4 rounded-xl bg-muted/50 flex items-start">
-                        <GlobeIcon class="h-5 w-5 text-primary mr-3 mt-1" />
-                        <div>
-                            <h4
-                                class="font-bold text-sm uppercase text-muted-foreground tracking-tight"
+                            <p
+                                class="text-xs text-primary font-medium mt-2 flex items-center"
                             >
-                                Coordinates
-                            </h4>
-                            <div class="mt-1 space-y-1">
-                                <p class="font-medium text-sm sm:text-base">
-                                    Lat: {placemark.lat.toFixed(6)}
-                                </p>
-                                <p class="font-medium text-sm sm:text-base">
-                                    Lng: {placemark.lng.toFixed(6)}
-                                </p>
-                            </div>
+                                <LockIcon class="h-3 w-3 mr-1" /> Specific address
+                                hidden for privacy
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -262,7 +246,7 @@
                         </div>
                     </div>
                     <div
-                        class="rounded-2xl overflow-hidden border bg-muted shadow-sm aspect-video sm:aspect-[21/9] relative group"
+                        class="rounded-3xl overflow-hidden border bg-muted shadow-lg aspect-square sm:aspect-[16/10] relative group ring-1 ring-border"
                     >
                         {#if mapKey}
                             <Map
@@ -312,17 +296,62 @@
                             </div>
                             <div>
                                 <p class="font-bold">
-                                    {placemark.user.profile.first_name}
-                                    {placemark.user.profile.last_name}
+                                    {placemark.user.profile.first_name?.[0]}. {placemark
+                                        .user.profile.last_name}
                                 </p>
                                 <p class="text-xs text-muted-foreground">
-                                    Certified Host
+                                    Verified Host
                                 </p>
                             </div>
                         </div>
-                        <Button variant="secondary" class="w-full"
-                            >Contact Host</Button
-                        >
+
+                        {#if placemark.user.profile.contact_email || placemark.user.profile.contact_phone}
+                            <div class="pt-4 border-t space-y-3">
+                                <p
+                                    class="text-xs font-bold uppercase text-muted-foreground tracking-widest"
+                                >
+                                    Contact Information
+                                </p>
+
+                                {#if placemark.user.profile.contact_email}
+                                    <div class="flex items-center text-sm">
+                                        <div
+                                            class="size-6 rounded bg-primary/5 flex items-center justify-center mr-3 text-primary"
+                                        >
+                                            <GlobeIcon class="size-3.5" />
+                                        </div>
+                                        <a
+                                            href="mailto:{placemark.user.profile
+                                                .contact_email}"
+                                            class="hover:underline font-medium"
+                                        >
+                                            {placemark.user.profile
+                                                .contact_email}
+                                        </a>
+                                    </div>
+                                {/if}
+
+                                {#if placemark.user.profile.contact_phone}
+                                    <div class="flex items-center text-sm">
+                                        <div
+                                            class="size-6 rounded bg-primary/5 flex items-center justify-center mr-3 text-primary"
+                                        >
+                                            <GlobeIcon class="size-3.5" />
+                                        </div>
+                                        <p class="font-medium">
+                                            {placemark.user.profile
+                                                .contact_phone}
+                                        </p>
+                                    </div>
+                                {/if}
+                            </div>
+                        {:else}
+                            <p
+                                class="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg border border-dashed text-center"
+                            >
+                                Direct contact info not shared.
+                            </p>
+                        {/if}
                     </Card.Content>
                 </Card.Root>
 

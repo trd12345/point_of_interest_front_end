@@ -55,7 +55,7 @@
         <Card.Title class="text-xl line-clamp-1">{placemark.name}</Card.Title>
         <Card.Description class="flex items-center mt-1 text-xs">
             <MapPinIcon class="h-3 w-3 mr-1 text-primary" />
-            {placemark.street}, {placemark.city}
+            {placemark.city}, {placemark.country}
         </Card.Description>
     </Card.Header>
     <Card.Content class="px-4 pb-4 pt-0">
@@ -72,8 +72,8 @@
                     <UserIcon class="h-3 w-3 text-muted-foreground" />
                 </div>
                 <span class="text-xs font-medium">
-                    {placemark.user.profile.first_name}
-                    {placemark.user.profile.last_name}
+                    {placemark.user.profile.first_name?.[0]}. {placemark.user
+                        .profile.last_name}
                 </span>
             </div>
             <a

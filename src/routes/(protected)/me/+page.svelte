@@ -11,6 +11,8 @@
     let firstName = $state(userState.me?.profile.first_name || "");
     let lastName = $state(userState.me?.profile.last_name || "");
     let email = $state(userState.me?.email || "");
+    let contactEmail = $state(userState.me?.profile.contact_email || "");
+    let contactPhone = $state(userState.me?.profile.contact_phone || "");
     let email_verified_at = $state(userState.me?.email_verified_at || null);
 
     let currentPassword = $state("");
@@ -47,6 +49,8 @@
                     firstName,
                     lastName,
                     email,
+                    contactEmail,
+                    contactPhone,
                 }),
             });
 
@@ -160,6 +164,8 @@
             firstName = userState.me.profile.first_name;
             lastName = userState.me.profile.last_name;
             email = userState.me.email;
+            contactEmail = userState.me.profile.contact_email || "";
+            contactPhone = userState.me.profile.contact_phone || "";
             email_verified_at = userState.me.email_verified_at;
             console.log(email_verified_at);
         }
@@ -222,7 +228,7 @@
                     </div>
 
                     <Field.Field>
-                        <Field.Label for="email">Email</Field.Label>
+                        <Field.Label for="email">Account Email</Field.Label>
                         <Input
                             id="email"
                             type="email"
@@ -233,10 +239,49 @@
                             {#if !email_verified_at}
                                 Please verify your email
                             {:else}
-                                Changing your email will require verification.
+                                Changing your account email will require
+                                re-verification.
                             {/if}
                         </Field.Description>
                     </Field.Field>
+
+                    <div class="pt-4 border-t space-y-4">
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-medium">
+                                Public Contact Details
+                            </h4>
+                            <p class="text-xs text-muted-foreground">
+                                These details will be shared with guests who
+                                contact you about your spots. If left blank,
+                                your account email will NOT be shared.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Field.Field>
+                                <Field.Label for="contactEmail"
+                                    >Contact Email (Public)</Field.Label
+                                >
+                                <Input
+                                    id="contactEmail"
+                                    type="email"
+                                    placeholder="e.g. hello@example.com"
+                                    bind:value={contactEmail}
+                                />
+                            </Field.Field>
+                            <Field.Field>
+                                <Field.Label for="contactPhone"
+                                    >Contact Phone (Public)</Field.Label
+                                >
+                                <Input
+                                    id="contactPhone"
+                                    type="tel"
+                                    placeholder="e.g. +49 123 456789"
+                                    bind:value={contactPhone}
+                                />
+                            </Field.Field>
+                        </div>
+                    </div>
 
                     <Card.Footer class="px-0 pt-4">
                         <Button type="submit" disabled={profileLoading}>

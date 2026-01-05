@@ -38,8 +38,7 @@
         </Avatar.Root>
         <div class="hidden md:flex flex-col items-start gap-0.5">
             <span class="text-xs font-semibold leading-none">
-                {userState.me?.profile?.first_name}
-                {userState.me?.profile?.last_name}
+                {userState.maskedName}
             </span>
             <span class="text-[10px] text-muted-foreground leading-none">
                 {userState.me?.email}
@@ -50,8 +49,7 @@
         <DropdownMenu.Label class="font-normal">
             <div class="flex flex-col space-y-1">
                 <p class="text-sm font-medium leading-none">
-                    {userState.me?.profile.first_name}
-                    {userState.me?.profile.last_name}
+                    {userState.maskedName}
                 </p>
                 <p class="text-xs leading-none text-muted-foreground">
                     {userState.me?.email}
