@@ -55,7 +55,7 @@
 
 <div class="min-h-screen bg-background flex flex-col">
     <SiteNavigation />
-    <main class="flex-1 mt-16">
+    <main class="flex-1 mt-16 p-4">
         {@render children()}
     </main>
 </div>
