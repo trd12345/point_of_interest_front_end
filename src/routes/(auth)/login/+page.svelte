@@ -107,7 +107,10 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ token: response.credential }),
+                body: JSON.stringify({
+                    token: response.credential,
+                    intent: "login",
+                }),
             });
 
             if (res.ok) {
